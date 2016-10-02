@@ -1,0 +1,38 @@
+name: ${project.name}
+main: de.themoep.commandblockpermissions.CommandBlockPermissions
+version: '${minecraft.plugin.version}'
+description: ${project.description}
+authors: [Phoenix616]
+depend: [ProtocolLib]
+commands:
+   commandblockpermissions:
+      aliases: [cbp, commandblockperms, cbperms]
+      description: Main plugin command
+      usage: /<command> [reload|disabled <player> <command...>]
+      permission: commandblockpermissions.command
+      permission-message: You don't have the permission <permission>
+permissions:
+   commandblockpermissions.receivewarnings:
+      description: Gives permission to receive warnings
+      default: false
+   commandblockpermissions.command:
+      description: Gives permission to the plugin command
+      default: op
+   commandblockpermissions.command.reload:
+      description: Gives permission to reload the plugin
+      default: op
+   commandblockpermissions.options.disabletrackoutput:
+      description: Gives permission to disable tracking of output
+      default: false
+   commandblockpermissions.options.conditional:
+      description: Gives permission to set command blocks to conditional mode
+      default: false
+   commandblockpermissions.options.mode.redstone:
+      description: Gives permission to use the redstone mode
+      default: true
+   commandblockpermissions.options.mode.auto:
+      description: Gives permission to use the automatic mode
+      default: false
+   commandblockpermissions.options.mode.sequence:
+      description: Gives permission to use the sequence mode
+      default: false

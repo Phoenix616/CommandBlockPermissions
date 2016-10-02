@@ -1,0 +1,16 @@
+logWarnings: true
+# Toggle logging of warnings to the console/log file
+# To receive warnings ingame use the following permission:
+# commandblockpermissions.receivewarnings
+
+checkOps: true
+# Check permissions of ops as command blocks will execute
+# with a higher permission level than they would themselves
+
+usePlayerPermissions: false
+# Allow players the usage of commands for which they already
+# have the permissions to. This can cause issues with some
+# plugins as they check additional permissions in their command
+# resolver which this plugin can't check for.
+# Use commandblockpermissions.permission.<commandpermission> to
+# allow players only access to certain commands in command blocks!
