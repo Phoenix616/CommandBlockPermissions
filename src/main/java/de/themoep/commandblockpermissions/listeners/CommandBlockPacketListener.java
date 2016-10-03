@@ -54,21 +54,23 @@ public class CommandBlockPacketListener extends PacketAdapter {
 
             ByteBuf buf = (ByteBuf) b.get(event.getPacket().getHandle());
 
+            ByteBufInputStream in = new ByteBufInputStream(buf);
+
             switch (channel) {
                 case MC_AdvCmd:
                 case MC_AdvCdm:
-                    byte type = buf.readByte();
+                    byte type = in.readByte();
                     if (type == 0) { // Command Block
-                        handlePluginMessage(event, buf, false, false);
+                        handlePluginMessage(event, in, false, false);
                     } else if (type == 1) { // Command Minecart
-                        handlePluginMessage(event, buf, false, true);
+                        handlePluginMessage(event, in, false, true);
                     } else {
                         plugin.getLogger().log(Level.WARNING, "Received plugin message from " + event.getPlayer().getName() + " on channel " + channel + " which's first byte wasn't 0 or 1 (" + type + ")");
                         return;
                     }
                     break;
                 case MC_AutoCmd:
-                    handlePluginMessage(event, buf, true, false);
+                    handlePluginMessage(event, in, true, false);
                     break;
             }
         } catch (IllegalArgumentException ignored) {
@@ -78,15 +80,13 @@ public class CommandBlockPacketListener extends PacketAdapter {
         }
     }
 
-    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
+    private void handlePluginMessage(PacketEvent event, ByteBufInputStream in, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
                 event.setCancelled(true);
                 return;
             }
         }
-
-        ByteBufInputStream in = new ByteBufInputStream(buf);
 
         int x = 0;
         int y = 0;
@@ -183,7 +183,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
             out.writeBoolean(automatic);
         }
 
-        b.set(event.getPacket().getHandle(), buf);
+        b.set(event.getPacket().getHandle(), out.buffer());
     }
 
     public enum Channel {
