@@ -13,6 +13,7 @@ import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -39,15 +40,20 @@ public class CommandBlockPacketListener extends PacketAdapter {
 
     private final CommandBlockPermissions plugin;
     private final Constructor<?> packetDataSerializer;
+    private final CommandMap bukkitCommandMap;
     private Field b = null;
 
-    public CommandBlockPacketListener(CommandBlockPermissions plugin) throws ClassNotFoundException, NoSuchMethodException {
+    public CommandBlockPacketListener(CommandBlockPermissions plugin) throws ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.CUSTOM_PAYLOAD);
         this.plugin = plugin;
 
         String packageName = plugin.getServer().getClass().getPackage().getName();
         String serverVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
         packetDataSerializer = Class.forName("net.minecraft.server." + serverVersion + ".PacketDataSerializer").getConstructor(ByteBuf.class);
+
+        Field commandMapField = plugin.getServer().getClass().getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        bukkitCommandMap = (CommandMap) commandMapField.get(plugin.getServer());
     }
 
     @Override
@@ -128,7 +134,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                     checkCommandString = checkCommandString.substring(1);
                 }
                 String commandName = checkCommandString.split(" ")[0];
-                Command command = plugin.getServer().getPluginCommand(commandName);
+                Command command = bukkitCommandMap.getCommand(commandName);
                 boolean hasPerm = false;
                 if (command != null) {
                     hasPerm = plugin.usePlayerPermissions() &&

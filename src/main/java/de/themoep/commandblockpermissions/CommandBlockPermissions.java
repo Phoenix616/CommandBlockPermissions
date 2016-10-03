@@ -38,7 +38,7 @@ public class CommandBlockPermissions extends JavaPlugin {
         protocolManager = ProtocolLibrary.getProtocolManager();
         try {
             protocolManager.addPacketListener(new CommandBlockPacketListener(this));
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
             getLogger().log(Level.SEVERE, "Error while enabling the packet listener!", e);
             getServer().getPluginManager().disablePlugin(this);
             return;
