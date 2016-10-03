@@ -15,6 +15,12 @@ permissions:
    commandblockpermissions.receivewarnings:
       description: Gives permission to receive warnings
       default: false
+   commandblockpermissions.commandblock.place:
+      description: Gives permission to place command blocks
+      default: false
+   commandblockpermissions.commandblock.break:
+      description: Gives permission to break command blocks
+      default: false
    commandblockpermissions.commandblock.access:
       description: Gives permission to access command blocks
       default: op

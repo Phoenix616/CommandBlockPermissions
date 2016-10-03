@@ -3,6 +3,7 @@ package de.themoep.commandblockpermissions;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.themoep.commandblockpermissions.listeners.CommandBlockPacketListener;
+import de.themoep.commandblockpermissions.listeners.PlayerEventListener;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,6 +38,7 @@ public class CommandBlockPermissions extends JavaPlugin {
         loadConfig();
         getCommand(getName().toLowerCase()).setExecutor(new CommandBlockPermissionsCommand(this));
         protocolManager.addPacketListener(new CommandBlockPacketListener(this));
+        getServer().getPluginManager().registerEvents(new PlayerEventListener(this), this);
     }
 
     public void loadConfig() {
