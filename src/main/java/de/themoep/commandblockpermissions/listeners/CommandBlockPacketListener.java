@@ -125,19 +125,21 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 if (checkCommandString.startsWith("/")) {
                     checkCommandString = checkCommandString.substring(1);
                 }
-                Command command = plugin.getServer().getPluginCommand(checkCommandString.split(" ")[0]);
+                String commandName = checkCommandString.split(" ")[0];
+                Command command = plugin.getServer().getPluginCommand(commandName);
+                boolean hasPerm = false;
                 if (command != null) {
-                    boolean hasPerm = plugin.usePlayerPermissions() &&
+                    hasPerm = plugin.usePlayerPermissions() &&
                             event.getPlayer().hasPermission(command.getPermission())
                             && !event.getPlayer().hasPermission("-commandblockpermissions.permission." + command.getPermission())
                             || event.getPlayer().hasPermission("commandblockpermissions.permission." + command.getPermission());
-                    if (!hasPerm) {
-                        plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
-                        event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + command.getName() + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
-                        commandString = "cbp disabled " + commandString;
-                    }
                 } else {
-                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'!");
+                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'! Checking");
+                }
+                if (!hasPerm) {
+                    plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
+                    event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + commandName + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
+                    commandString = "cbp disabled " + commandString;
                 }
             }
 
