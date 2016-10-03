@@ -61,7 +61,7 @@ public class CommandBlockPermissions extends JavaPlugin {
             getLogger().log(Level.INFO, msg);
         }
         for (Player player : getServer().getOnlinePlayers()) {
-            if (player.hasPermission(getName().toLowerCase() + ".receivewarnings")) {
+            if (player.hasPermission("cbp.receivewarnings")) {
                 player.sendMessage(getPrefix() + ChatColor.RED + " " + msg);
             }
         }

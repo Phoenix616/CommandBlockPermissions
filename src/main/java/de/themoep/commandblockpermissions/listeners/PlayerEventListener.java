@@ -41,10 +41,10 @@ public class PlayerEventListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (isCommandBlock(event.getClickedBlock().getType())) {
-                boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.access");
+                boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("cbp.commandblock.access");
                 event.setCancelled(!allowed);
             } else if (event.getItem() != null && isCommandBlock(event.getItem().getType())) {
-                boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.place");
+                boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("cbp.commandblock.place");
                 event.setCancelled(!allowed);
             }
         }
@@ -53,7 +53,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if (isCommandBlock(event.getBlock().getType())) {
-            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.place");
+            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("cbp.commandblock.place");
             event.setCancelled(!allowed);
         }
     }
@@ -61,7 +61,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (isCommandBlock(event.getBlock().getType())) {
-            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.break");
+            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("cbp.commandblock.break");
             event.setCancelled(!allowed);
         }
     }
@@ -69,7 +69,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onBlockDamage(BlockDamageEvent event) {
         if (isCommandBlock(event.getBlock().getType())) {
-            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.break");
+            boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("cbp.commandblock.break");
             event.setCancelled(!allowed);
         }
     }

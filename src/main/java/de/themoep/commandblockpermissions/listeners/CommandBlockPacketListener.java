@@ -94,7 +94,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
 
     private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException, InvocationTargetException, InstantiationException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
-            if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
+            if (!event.getPlayer().hasPermission("cbp.commandblock.change")) {
                 event.setCancelled(true);
                 return;
             }
@@ -139,8 +139,8 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 if (command != null) {
                     hasPerm = plugin.usePlayerPermissions() &&
                             event.getPlayer().hasPermission(command.getPermission())
-                            && !event.getPlayer().hasPermission("-commandblockpermissions.permission." + command.getPermission())
-                            || event.getPlayer().hasPermission("commandblockpermissions.permission." + command.getPermission());
+                            && !event.getPlayer().hasPermission("-cbp.perm." + command.getPermission())
+                            || event.getPlayer().hasPermission("cbp.perm." + command.getPermission());
                 } else {
                     plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'! Checking");
                 }
@@ -151,7 +151,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 }
             }
 
-            String optPerm = "commandblockpermissions.options.";
+            String optPerm = "cbp.options.";
 
             if (!trackOutput && !event.getPlayer().hasPermission(optPerm + "disabletrackoutput")){
                 event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to disable tracking of the output!");

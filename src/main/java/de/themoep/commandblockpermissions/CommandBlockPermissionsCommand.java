@@ -37,7 +37,7 @@ public class CommandBlockPermissionsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
-            if ("reload".equalsIgnoreCase(args[0]) && sender.hasPermission(plugin.getName().toLowerCase() + ".command.reload")) {
+            if ("reload".equalsIgnoreCase(args[0]) && sender.hasPermission("cbp.command.reload")) {
                 plugin.loadConfig();
                 sender.sendMessage(ChatColor.YELLOW + "Config reloaded!");
                 return true;

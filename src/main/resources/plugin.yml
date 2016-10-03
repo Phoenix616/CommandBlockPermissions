@@ -9,42 +9,42 @@ commands:
       aliases: [cbp, commandblockperms, cbperms]
       description: Main plugin command
       usage: /<command> [reload|disabled <player> <command...>]
-      permission: commandblockpermissions.command
+      permission: cbp.command
       permission-message: You don't have the permission <permission>
 permissions:
-   commandblockpermissions.receivewarnings:
+   cbp.receivewarnings:
       description: Gives permission to receive warnings
       default: false
-   commandblockpermissions.commandblock.place:
+   cbp.commandblock.place:
       description: Gives permission to place command blocks
       default: false
-   commandblockpermissions.commandblock.break:
+   cbp.commandblock.break:
       description: Gives permission to break command blocks
       default: false
-   commandblockpermissions.commandblock.access:
+   cbp.commandblock.access:
       description: Gives permission to access command blocks
       default: op
-   commandblockpermissions.commandblock.change:
+   cbp.commandblock.change:
       description: Gives permission to change command blocks
       default: false
-   commandblockpermissions.command:
+   cbp.command:
       description: Gives permission to the plugin command
       default: op
-   commandblockpermissions.command.reload:
+   cbp.command.reload:
       description: Gives permission to reload the plugin
       default: op
-   commandblockpermissions.options.disabletrackoutput:
+   cbp.options.disabletrackoutput:
       description: Gives permission to disable tracking of output
       default: false
-   commandblockpermissions.options.conditional:
+   cbp.options.conditional:
       description: Gives permission to set command blocks to conditional mode
       default: false
-   commandblockpermissions.options.mode.redstone:
+   cbp.options.mode.redstone:
       description: Gives permission to use the redstone mode
       default: true
-   commandblockpermissions.options.mode.auto:
+   cbp.options.mode.auto:
       description: Gives permission to use the automatic mode
       default: false
-   commandblockpermissions.options.mode.sequence:
+   cbp.options.mode.sequence:
       description: Gives permission to use the sequence mode
       default: false
