@@ -9,9 +9,11 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.themoep.commandblockpermissions.CommandBlockMode;
 import de.themoep.commandblockpermissions.CommandBlockPermissions;
+import io.netty.buffer.ByteBuf;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 
 /**
@@ -43,7 +45,21 @@ public class CommandBlockPacketListener extends PacketAdapter {
         try {
             Channel channel = Channel.valueOf(event.getPacket().getStrings().read(0).replace('|', '_'));
 
-            ByteArrayDataInput in = ByteStreams.newDataInput(event.getPacket().getByteArrays().read(0));
+            Field b = event.getPacket().getHandle().getClass().getDeclaredField("b");
+            b.setAccessible(true);
+            ByteBuf buf = (ByteBuf) b.get(event.getPacket().getHandle());
+            byte[] bytes;
+            int length = buf.readableBytes();
+
+            if (buf.hasArray()) {
+                bytes = buf.array();
+            } else {
+                bytes = new byte[length];
+                buf.getBytes(buf.readerIndex(), bytes);
+            }
+
+            ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+
             switch (channel) {
                 case MC_AdvCmd:
                 case MC_AdvCdm:
@@ -63,6 +79,8 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         } catch (IllegalArgumentException ignored) {
             // Not a channel we want to listen on
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
