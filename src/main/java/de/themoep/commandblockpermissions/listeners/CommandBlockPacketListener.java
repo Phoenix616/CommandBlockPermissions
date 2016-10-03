@@ -34,6 +34,7 @@ import java.util.logging.Level;
 public class CommandBlockPacketListener extends PacketAdapter {
 
     private final CommandBlockPermissions plugin;
+    private Field b = null;
 
     public CommandBlockPacketListener(CommandBlockPermissions plugin) {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.CUSTOM_PAYLOAD);
@@ -45,36 +46,28 @@ public class CommandBlockPacketListener extends PacketAdapter {
         try {
             Channel channel = Channel.valueOf(event.getPacket().getStrings().read(0).replace('|', '_'));
 
-            Field b = event.getPacket().getHandle().getClass().getDeclaredField("b");
-            b.setAccessible(true);
-            ByteBuf buf = (ByteBuf) b.get(event.getPacket().getHandle());
-            byte[] bytes;
-            int length = buf.readableBytes();
-
-            if (buf.hasArray()) {
-                bytes = buf.array();
-            } else {
-                bytes = new byte[length];
-                buf.getBytes(buf.readerIndex(), bytes);
+            if (b == null) {
+                b = event.getPacket().getHandle().getClass().getDeclaredField("b");
+                b.setAccessible(true);
             }
 
-            ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+            ByteBuf buf = (ByteBuf) b.get(event.getPacket().getHandle());
 
             switch (channel) {
                 case MC_AdvCmd:
                 case MC_AdvCdm:
-                    byte type = in.readByte();
+                    byte type = buf.readByte();
                     if (type == 0) { // Command Block
-                        handlePluginMessage(event, in, false, false);
+                        handlePluginMessage(event, buf, false, false);
                     } else if (type == 1) { // Command Minecart
-                        handlePluginMessage(event, in, false, true);
+                        handlePluginMessage(event, buf, false, true);
                     } else {
                         plugin.getLogger().log(Level.WARNING, "Received plugin message from " + event.getPlayer().getName() + " on channel " + channel + " which's first byte wasn't 0 or 1 (" + type + ")");
                         return;
                     }
                     break;
                 case MC_AutoCmd:
-                    handlePluginMessage(event, in, true, false);
+                    handlePluginMessage(event, buf, true, false);
                     break;
             }
         } catch (IllegalArgumentException ignored) {
@@ -84,13 +77,18 @@ public class CommandBlockPacketListener extends PacketAdapter {
         }
     }
 
-    private void handlePluginMessage(PacketEvent event, ByteArrayDataInput in, boolean autoCmd, boolean minecart) {
+    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
                 event.setCancelled(true);
                 return;
             }
         }
+
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+
         int x = 0;
         int y = 0;
         int z = 0;
@@ -186,7 +184,8 @@ public class CommandBlockPacketListener extends PacketAdapter {
             out.writeBoolean(automatic);
         }
 
-        event.getPacket().getByteArrays().write(0, out.toByteArray());
+        buf.clear().writeBytes(out.toByteArray());
+        b.set(event.getPacket().getHandle(), buf);
     }
 
     public enum Channel {
