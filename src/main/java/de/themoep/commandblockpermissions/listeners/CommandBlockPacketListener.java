@@ -142,7 +142,6 @@ public class CommandBlockPacketListener extends PacketAdapter {
                             && !event.getPlayer().hasPermission("-commandblockpermissions.permission." + command.getPermission())
                             || event.getPlayer().hasPermission("commandblockpermissions.permission." + command.getPermission());
                 } else {
-                    // we think it is a minecraft default command
                     plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'! Checking");
                 }
                 if (!hasPerm) {
