@@ -43,7 +43,7 @@ public class PlayerEventListener implements Listener {
             if (isCommandBlock(event.getClickedBlock().getType())) {
                 boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.access");
                 event.setCancelled(!allowed);
-            } else if (isCommandBlock(event.getItem().getType())) {
+            } else if (event.getItem() != null && isCommandBlock(event.getItem().getType())) {
                 boolean allowed = !plugin.checkOps() && event.getPlayer().isOp() || event.getPlayer().hasPermission("commandblockpermissions.commandblock.place");
                 event.setCancelled(!allowed);
             }
