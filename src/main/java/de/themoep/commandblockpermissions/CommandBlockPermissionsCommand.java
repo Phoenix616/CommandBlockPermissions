@@ -42,14 +42,14 @@ public class CommandBlockPermissionsCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.YELLOW + "Config reloaded!");
                 return true;
             }
-        } else if (args.length > 2) {
+        } else if (args.length > 1) {
             if ("disabled".equalsIgnoreCase(args[0])) {
                 if (sender instanceof BlockCommandSender) {
                     Block block = ((BlockCommandSender) sender).getBlock();
-                    plugin.warning("Command block in " + block.getWorld().getName() + " at " + block.getX() + " " + block.getY() + " " + block.getZ() + " tried to execute disabled command set by " + args[1]);
+                    plugin.warning("Command block in " + block.getWorld().getName() + " at " + block.getX() + " " + block.getY() + " " + block.getZ() + " tried to execute disabled command");
                 } else if (sender instanceof CommandMinecart) {
                     Location loc = ((CommandMinecart) sender).getLocation();
-                    plugin.warning("Command minecart in " + loc.getWorld().getName() + " at " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " tried to execute disabled command set by " + args[1]);
+                    plugin.warning("Command minecart in " + loc.getWorld().getName() + " at " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " tried to execute disabled command");
                 } else {
                     sender.sendMessage("This internal command can only be executed by a Command Block/Minecart!");
                 }

@@ -98,7 +98,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
         }
 
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
-            if (!commandString.isEmpty()) {
+            if (!commandString.isEmpty() && !commandString.toLowerCase().startsWith("cbp disabled ")) {
                 Command command = plugin.getServer().getPluginCommand(commandString.split(" ")[0]);
                 if (command != null) {
                     boolean hasPerm = plugin.usePlayerPermissions() &&
@@ -108,7 +108,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                     if (!hasPerm) {
                         plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
                         event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + command.getName() + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
-                        commandString = "cbp disabled " + event.getPlayer() + " " + commandString;
+                        commandString = "cbp disabled " + commandString;
                     }
                 } else {
                     plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'!");
