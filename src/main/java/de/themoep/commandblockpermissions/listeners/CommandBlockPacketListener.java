@@ -112,13 +112,13 @@ public class CommandBlockPacketListener extends PacketAdapter {
             automatic = buf.readBoolean();
         }
 
-        if (commandString.startsWith("/")) {
-            commandString = commandString.substring(1);
-        }
-
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!commandString.isEmpty() && !commandString.toLowerCase().startsWith("cbp disabled ")) {
-                Command command = plugin.getServer().getPluginCommand(commandString.split(" ")[0]);
+                String checkCommandString = commandString;
+                if (checkCommandString.startsWith("/")) {
+                    checkCommandString = checkCommandString.substring(1);
+                }
+                Command command = plugin.getServer().getPluginCommand(checkCommandString.split(" ")[0]);
                 if (command != null) {
                     boolean hasPerm = plugin.usePlayerPermissions() &&
                             event.getPlayer().hasPermission(command.getPermission())
