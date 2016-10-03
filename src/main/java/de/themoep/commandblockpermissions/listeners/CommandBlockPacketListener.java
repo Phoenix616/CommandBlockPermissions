@@ -240,21 +240,12 @@ public class CommandBlockPacketListener extends PacketAdapter {
     }
 
     private ByteBuf writeVarInt(int value, ByteBuf output) {
-        int part;
-        while (true) {
-            part = value & 127;
-
+        while ((value & -128) != 0) {
+            output.writeByte(value & 127 | 128);
             value >>>= 7;
-            if (value != 0) {
-                part |= 128;
-            }
-
-            output.writeByte(part);
-
-            if (value == 0) {
-                break;
-            }
         }
+
+        output.writeByte(value);
         return output;
     }
 
