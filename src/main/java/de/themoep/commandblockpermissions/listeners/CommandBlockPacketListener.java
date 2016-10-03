@@ -15,7 +15,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
 /**
@@ -36,11 +38,16 @@ import java.util.logging.Level;
 public class CommandBlockPacketListener extends PacketAdapter {
 
     private final CommandBlockPermissions plugin;
+    private final Constructor<?> packetDataSerializer;
     private Field b = null;
 
-    public CommandBlockPacketListener(CommandBlockPermissions plugin) {
+    public CommandBlockPacketListener(CommandBlockPermissions plugin) throws ClassNotFoundException, NoSuchMethodException {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.CUSTOM_PAYLOAD);
         this.plugin = plugin;
+
+        String packageName = plugin.getServer().getClass().getPackage().getName();
+        String serverVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
+        packetDataSerializer = Class.forName("net.minecraft.server." + serverVersion + ".PacketDataSerializer").getConstructor(ByteBuf.class);
     }
 
     @Override
@@ -74,12 +81,12 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         } catch (IllegalArgumentException ignored) {
             // Not a channel we want to listen on
-        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | IOException | InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
-    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
+    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException, InvocationTargetException, InstantiationException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
                 event.setCancelled(true);
@@ -187,7 +194,9 @@ public class CommandBlockPacketListener extends PacketAdapter {
             out.writeBoolean(automatic);
         }
 
-        b.set(event.getPacket().getHandle(), out);
+        Object data = packetDataSerializer.newInstance(out);
+
+        b.set(event.getPacket().getHandle(), data);
     }
 
     private String readString(ByteBuf buf) throws IOException {
