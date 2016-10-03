@@ -120,6 +120,8 @@ public class CommandBlockPacketListener extends PacketAdapter {
         }
 
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
+            boolean wasOP = event.getPlayer().isOp();
+            event.getPlayer().setOp(false);
             if (!commandString.isEmpty() && !commandString.toLowerCase().startsWith("cbp disabled ")) {
                 String checkCommandString = commandString;
                 if (checkCommandString.startsWith("/")) {
@@ -134,6 +136,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                             && !event.getPlayer().hasPermission("-commandblockpermissions.permission." + command.getPermission())
                             || event.getPlayer().hasPermission("commandblockpermissions.permission." + command.getPermission());
                 } else {
+                    // we think it is a minecraft default command
                     plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'! Checking");
                 }
                 if (!hasPerm) {
@@ -173,6 +176,8 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to use the conditional mode!");
                 isConditional = false;
             }
+
+            event.getPlayer().setOp(wasOP);
         }
 
         ByteBuf out = Unpooled.buffer();
