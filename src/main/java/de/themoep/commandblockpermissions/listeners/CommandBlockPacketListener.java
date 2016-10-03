@@ -4,12 +4,13 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
+import com.google.common.base.Charsets;
 import de.themoep.commandblockpermissions.CommandBlockMode;
 import de.themoep.commandblockpermissions.CommandBlockPermissions;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 
@@ -54,23 +55,21 @@ public class CommandBlockPacketListener extends PacketAdapter {
 
             ByteBuf buf = (ByteBuf) b.get(event.getPacket().getHandle());
 
-            ByteBufInputStream in = new ByteBufInputStream(buf);
-
             switch (channel) {
                 case MC_AdvCmd:
                 case MC_AdvCdm:
-                    byte type = in.readByte();
+                    byte type = buf.readByte();
                     if (type == 0) { // Command Block
-                        handlePluginMessage(event, in, false, false);
+                        handlePluginMessage(event, buf, false, false);
                     } else if (type == 1) { // Command Minecart
-                        handlePluginMessage(event, in, false, true);
+                        handlePluginMessage(event, buf, false, true);
                     } else {
                         plugin.getLogger().log(Level.WARNING, "Received plugin message from " + event.getPlayer().getName() + " on channel " + channel + " which's first byte wasn't 0 or 1 (" + type + ")");
                         return;
                     }
                     break;
                 case MC_AutoCmd:
-                    handlePluginMessage(event, in, true, false);
+                    handlePluginMessage(event, buf, true, false);
                     break;
             }
         } catch (IllegalArgumentException ignored) {
@@ -80,7 +79,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
         }
     }
 
-    private void handlePluginMessage(PacketEvent event, ByteBufInputStream in, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
+    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
                 event.setCancelled(true);
@@ -93,23 +92,24 @@ public class CommandBlockPacketListener extends PacketAdapter {
         int z = 0;
         int entityId = 0;
         if (minecart) {
-            entityId = in.readInt();
+            entityId = buf.readInt();
         } else {
-            x = in.readInt();
-            y = in.readInt();
-            z = in.readInt();
+            x = buf.readInt();
+            y = buf.readInt();
+            z = buf.readInt();
         }
-        String commandString = in.readUTF();
-        boolean trackOutput = in.readBoolean();
+        String commandString = readString(buf);
+
+        boolean trackOutput = buf.readBoolean();
 
         CommandBlockMode mode = CommandBlockMode.REDSTONE;
         boolean isConditional = false;
         boolean automatic = false;
 
         if (autoCmd) {
-            mode = CommandBlockMode.valueOf(in.readUTF());
-            isConditional = in.readBoolean();
-            automatic = in.readBoolean();
+            mode = CommandBlockMode.valueOf(readString(buf));
+            isConditional = buf.readBoolean();
+            automatic = buf.readBoolean();
         }
 
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
@@ -162,7 +162,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         }
 
-        ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
+        ByteBuf out = Unpooled.buffer();
 
         if (!autoCmd) {
             out.writeByte(minecart ? 1 : 0);
@@ -175,15 +175,87 @@ public class CommandBlockPacketListener extends PacketAdapter {
             out.writeInt(y);
             out.writeInt(z);
         }
-        out.writeUTF(commandString);
+        writeString(commandString, out);
         out.writeBoolean(trackOutput);
         if (autoCmd) {
-            out.writeUTF(mode.toString());
+            writeString(mode.toString(), out);
             out.writeBoolean(isConditional);
             out.writeBoolean(automatic);
         }
 
-        b.set(event.getPacket().getHandle(), out.buffer());
+        b.set(event.getPacket().getHandle(), out);
+    }
+
+    private String readString(ByteBuf buf) throws IOException {
+        int maxLength = Short.MAX_VALUE;
+        int length = readVarInt(buf);
+
+        if (length > maxLength * 4) {
+            throw new DecoderException("The received length of the encoded string buffer is too long! (length: " + length + ", allowed:" + maxLength * 4 + ")");
+        } else if (length < 0) {
+            throw new DecoderException("String buffer length is less than zero. Wat?");
+        } else {
+            String s = new String(buf.readBytes(length).array(), Charsets.UTF_8);
+
+            if (s.length() > maxLength) {
+                throw new DecoderException("The received string is too long! (length" + length + ", allowed" + maxLength + ")");
+            } else {
+                return s;
+            }
+        }
+    }
+
+    private ByteBuf writeString(String string, ByteBuf output) {
+        int maxLength = Short.MAX_VALUE;
+        byte[] bytes = string.getBytes(Charsets.UTF_8);
+
+        if (bytes.length > maxLength) {
+            throw new EncoderException("The length of the encoded string is too big (length: " + string.length() + ", alloowed " + maxLength + ")");
+        } else {
+            writeVarInt(bytes.length, output);
+            output.writeBytes(bytes);
+            return output;
+        }
+    }
+
+    private int readVarInt(ByteBuf buf) throws IOException {
+        int out = 0;
+        int bytes = 0;
+        byte in;
+        while (true) {
+            in = buf.readByte();
+
+            out |= (in & 127) << (bytes++ * 7);
+
+            if (bytes > 5) {
+                throw new RuntimeException("The receives VarInt is too big (is " + bytes + ", allowed: 5)");
+            }
+
+            if ((in & 128) != 128) {
+                break;
+            }
+        }
+
+        return out;
+    }
+
+    private ByteBuf writeVarInt(int value, ByteBuf output) {
+        int part;
+        while (true) {
+            part = value & 127;
+
+            value >>>= 7;
+            if (value != 0) {
+                part |= 128;
+            }
+
+            output.writeByte(part);
+
+            if (value == 0) {
+                break;
+            }
+        }
+        return output;
     }
 
     public enum Channel {
