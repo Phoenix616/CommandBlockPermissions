@@ -29,12 +29,13 @@ import java.util.logging.Level;
 
 public class CommandBlockPermissions extends JavaPlugin {
 
-    private final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+    private ProtocolManager protocolManager;
     private boolean logWarnings;
     private boolean checkOps;
     private boolean usePlayerPermissions;
 
     public void onEnable() {
+        protocolManager = ProtocolLibrary.getProtocolManager();
         loadConfig();
         getCommand(getName().toLowerCase()).setExecutor(new CommandBlockPermissionsCommand(this));
         protocolManager.addPacketListener(new CommandBlockPacketListener(this));
