@@ -67,6 +67,12 @@ public class CommandBlockPacketListener extends PacketAdapter {
     }
 
     private void handlePluginMessage(PacketEvent event, ByteArrayDataInput in, boolean autoCmd, boolean minecart) {
+        if (!event.getPlayer().isOp() || plugin.checkOps()) {
+            if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         int x = 0;
         int y = 0;
         int z = 0;

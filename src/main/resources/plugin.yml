@@ -15,6 +15,12 @@ permissions:
    commandblockpermissions.receivewarnings:
       description: Gives permission to receive warnings
       default: false
+   commandblockpermissions.commandblock.access:
+      description: Gives permission to access command blocks
+      default: op
+   commandblockpermissions.commandblock.change:
+      description: Gives permission to change command blocks
+      default: false
    commandblockpermissions.command:
       description: Gives permission to the plugin command
       default: op
