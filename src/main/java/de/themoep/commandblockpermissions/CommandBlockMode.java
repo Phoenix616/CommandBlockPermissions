@@ -16,7 +16,17 @@ package de.themoep.commandblockpermissions;
  * along with this program. If not, see <http://mozilla.org/MPL/2.0/>.
  */
 public enum CommandBlockMode {
-    SEQUENCE,
-    AUTO,
-    REDSTONE;
+    SEQUENCE("Chain"),
+    AUTO("Repeating"),
+    REDSTONE("Impulse");
+
+    private final String name;
+
+    CommandBlockMode(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

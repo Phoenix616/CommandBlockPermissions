@@ -159,7 +159,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
 
             if (!event.getPlayer().hasPermission(optPerm + "mode." + mode.toString().toLowerCase())) {
-                event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to use the " + mode + " mode!");
+                event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to use the " + mode.getName() + "(" + mode.toString().toLowerCase() + ") mode!");
                 CommandBlockMode oldMode = mode;
                 for (CommandBlockMode m : CommandBlockMode.values()) {
                     if (m == mode) {
