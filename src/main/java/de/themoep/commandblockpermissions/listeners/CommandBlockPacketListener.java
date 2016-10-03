@@ -4,15 +4,16 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import de.themoep.commandblockpermissions.CommandBlockMode;
 import de.themoep.commandblockpermissions.CommandBlockPermissions;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.Unpooled;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 
@@ -72,12 +73,12 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         } catch (IllegalArgumentException ignored) {
             // Not a channel we want to listen on
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException {
+    private void handlePluginMessage(PacketEvent event, ByteBuf buf, boolean autoCmd, boolean minecart) throws IllegalAccessException, IOException {
         if (!event.getPlayer().isOp() || plugin.checkOps()) {
             if (!event.getPlayer().hasPermission("commandblockpermissions.commandblock.change")) {
                 event.setCancelled(true);
@@ -85,9 +86,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         }
 
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+        ByteBufInputStream in = new ByteBufInputStream(buf);
 
         int x = 0;
         int y = 0;
@@ -163,7 +162,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
             }
         }
 
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
 
         if (!autoCmd) {
             out.writeByte(minecart ? 1 : 0);
@@ -184,7 +183,6 @@ public class CommandBlockPacketListener extends PacketAdapter {
             out.writeBoolean(automatic);
         }
 
-        buf.clear().writeBytes(out.toByteArray());
         b.set(event.getPacket().getHandle(), buf);
     }
 
