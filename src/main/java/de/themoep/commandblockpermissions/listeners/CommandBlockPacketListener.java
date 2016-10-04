@@ -142,7 +142,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                             && !event.getPlayer().hasPermission("-cbp.perm." + command.getPermission())
                             || event.getPlayer().hasPermission("cbp.perm." + command.getPermission());
                 } else {
-                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + commandString + "'! Checking");
+                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + (commandString.length() > 210 ? commandString.substring(0, 200) + "..." : commandString) + "'! Checking");
                 }
                 if (!hasPerm) {
                     plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
