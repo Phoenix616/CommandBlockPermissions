@@ -31,10 +31,13 @@ usePlayerPermissions: false
 # allow players only access to certain commands in command blocks!
 ```
 
-## Permissions
+## Permissions 
 |           Permission           |                        Description                         |
 | -------------------------------|------------------------------------------------------------|
-| cbp.perm.<command.permission>  | Player has permission while setting command block command  |
+| cbp.perm.%permission.node%     | This allows you to define a permission that the player     |
+|                                |  should have when he sets a command in a command block.    |
+|                                | (Replace %permission.node% with any permission)            |
+|                                | E.g. cbp.perm.minecraft.command.give for the /give command |
 | cbp.commandblock.place         | Place command blocks                                       |
 | cbp.commandblock.break         | Break command blocks                                       |
 | cbp.commandblock.access        | Access command blocks                                      |
