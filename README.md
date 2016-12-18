@@ -27,8 +27,8 @@ usePlayerPermissions: false
 # have the permissions to. This can cause issues with some
 # plugins as they check additional permissions in their command
 # resolver which this plugin can't check for.
-# Use commandblockpermissions.permission.<commandpermission> to
-# allow players only access to certain commands in command blocks!
+# Use cbp.perm.<commandpermission> to allow players only access
+# to certain commands in command blocks!
 ```
 
 ## Permissions 
