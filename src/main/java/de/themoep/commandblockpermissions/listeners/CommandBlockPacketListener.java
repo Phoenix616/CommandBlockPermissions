@@ -147,7 +147,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 if (!hasPerm) {
                     plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
                     event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + commandName + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
-                    commandString = "cbp disabled " + commandString;
+                    commandString = "cbp disabled " + event.getPlayer().getName() + " " + commandString;
                 }
             }
 
@@ -172,7 +172,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 if (oldMode == mode) {
                     mode = CommandBlockMode.REDSTONE;
                     if (!commandString.startsWith("cbp disabled ")) {
-                        commandString = "cbp disabled " + event.getPlayer() + " " + commandString;
+                        commandString = "cbp disabled " + event.getPlayer().getName() + " " + commandString;
                     }
                 }
             }
