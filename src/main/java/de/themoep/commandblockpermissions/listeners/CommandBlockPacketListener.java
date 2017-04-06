@@ -235,7 +235,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
         byte[] bytes = string.getBytes(Charsets.UTF_8);
 
         if (bytes.length > maxLength) {
-            throw new EncoderException("The length of the encoded string is too big (length: " + string.length() + ", alloowed " + maxLength + ")");
+            throw new EncoderException("The length of the encoded string is too big (length: " + string.length() + ", allowed " + maxLength + ")");
         } else {
             writeVarInt(bytes.length, output);
             output.writeBytes(bytes);
@@ -247,7 +247,7 @@ public class CommandBlockPacketListener extends PacketAdapter {
         int out = 0;
         int bytes = 0;
         byte in;
-        while (true) {
+        do {
             in = buf.readByte();
 
             out |= (in & 127) << (bytes++ * 7);
@@ -256,21 +256,21 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 throw new RuntimeException("The receives VarInt is too big (is " + bytes + ", allowed: 5)");
             }
 
-            if ((in & 128) != 128) {
-                break;
-            }
-        }
+        } while ((in & 128) == 128);
 
         return out;
     }
 
     private ByteBuf writeVarInt(int value, ByteBuf output) {
-        while ((value & -128) != 0) {
-            output.writeByte(value & 127 | 128);
+        do {
+            int temp = value & 127;
             value >>>= 7;
-        }
 
-        output.writeByte(value);
+            if (value != 0) {
+                temp |= 128;
+            }
+            output.writeByte(temp);
+        } while (value != 0);
         return output;
     }
 
