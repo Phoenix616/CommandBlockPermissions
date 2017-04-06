@@ -135,14 +135,14 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 }
                 String commandName = checkCommandString.split(" ")[0];
                 Command command = bukkitCommandMap.getCommand(commandName);
-                boolean hasPerm = false;
+                boolean hasPerm = event.getPlayer().hasPermission("cbp.perm.*");
                 if (command != null) {
                     hasPerm = plugin.usePlayerPermissions() &&
                             event.getPlayer().hasPermission(command.getPermission())
                             && !event.getPlayer().hasPermission("-cbp.perm." + command.getPermission())
                             || event.getPlayer().hasPermission("cbp.perm." + command.getPermission());
                 } else {
-                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + (commandString.length() > 210 ? commandString.substring(0, 200) + "..." : commandString) + "'! Checking");
+                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + (commandString.length() > 210 ? commandString.substring(0, 200) + "..." : commandString) + "'!");
                 }
                 if (!hasPerm) {
                     plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
