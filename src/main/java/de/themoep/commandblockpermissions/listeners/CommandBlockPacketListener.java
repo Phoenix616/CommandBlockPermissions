@@ -12,6 +12,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 
@@ -185,30 +187,46 @@ public class CommandBlockPacketListener extends PacketAdapter {
             event.getPlayer().setOp(wasOP);
         }
 
-        ByteBuf out = Unpooled.buffer();
+        if (plugin.getServer().spigot().getConfig().getBoolean("settings.bungeecord")) {
+            // BungeeCord seems to have an issue with some packet that the server sends
+            // after manipulating the command block packet? Not sure why 'though, it works
+            // fine without BungeeCord. Lets work around it anyways.
 
-        if (!autoCmd) {
-            out.writeByte(minecart ? 1 : 0);
-        }
+            // Fuck this shit, there is no CommandBlock api in Bukkit ;_;
+            event.setCancelled(true);
+            if (minecart) {
 
-        if (minecart) {
-            out.writeInt(entityId);
+            } else {
+                Block block = event.getPlayer().getWorld().getBlockAt(x, y, z);
+                CommandBlock cb = (CommandBlock) block.getState();
+            }
+
         } else {
-            out.writeInt(x);
-            out.writeInt(y);
-            out.writeInt(z);
-        }
-        writeString(commandString, out);
-        out.writeBoolean(trackOutput);
-        if (autoCmd) {
-            writeString(mode.toString(), out);
-            out.writeBoolean(isConditional);
-            out.writeBoolean(automatic);
-        }
+            ByteBuf out = Unpooled.buffer();
 
-        Object data = packetDataSerializer.newInstance(out);
+            if (!autoCmd) {
+                out.writeByte(minecart ? 1 : 0);
+            }
 
-        b.set(event.getPacket().getHandle(), data);
+            if (minecart) {
+                out.writeInt(entityId);
+            } else {
+                out.writeInt(x);
+                out.writeInt(y);
+                out.writeInt(z);
+            }
+            writeString(commandString, out);
+            out.writeBoolean(trackOutput);
+            if (autoCmd) {
+                writeString(mode.toString(), out);
+                out.writeBoolean(isConditional);
+                out.writeBoolean(automatic);
+            }
+
+            Object data = packetDataSerializer.newInstance(out);
+
+            b.set(event.getPacket().getHandle(), data);
+        }
     }
 
     private String readString(ByteBuf buf) throws IOException {
