@@ -23,16 +23,16 @@ permissions:
       default: false
    cbp.commandblock.access:
       description: Gives permission to access command blocks
-      default: op
+      default: false
    cbp.commandblock.change:
       description: Gives permission to change command blocks
       default: false
    cbp.command:
       description: Gives permission to the plugin command
-      default: op
+      default: false
    cbp.command.reload:
       description: Gives permission to reload the plugin
-      default: op
+      default: false
    cbp.options.disabletrackoutput:
       description: Gives permission to disable tracking of output
       default: false

@@ -38,14 +38,14 @@ public class CommandBlockPermissions extends JavaPlugin {
         protocolManager = ProtocolLibrary.getProtocolManager();
         try {
             protocolManager.addPacketListener(new CommandBlockPacketListener(this));
+            loadConfig();
+            getCommand(getName().toLowerCase()).setExecutor(new CommandBlockPermissionsCommand(this));
+            getServer().getPluginManager().registerEvents(new PlayerEventListener(this), this);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
             getLogger().log(Level.SEVERE, "Error while enabling the packet listener!", e);
             getServer().getPluginManager().disablePlugin(this);
-            return;
         }
-        loadConfig();
-        getCommand(getName().toLowerCase()).setExecutor(new CommandBlockPermissionsCommand(this));
-        getServer().getPluginManager().registerEvents(new PlayerEventListener(this), this);
+
     }
 
     public void loadConfig() {

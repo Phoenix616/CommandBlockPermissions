@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -135,27 +138,42 @@ public class CommandBlockPacketListener extends PacketAdapter {
                 if (checkCommandString.startsWith("/")) {
                     checkCommandString = checkCommandString.substring(1);
                 }
-                String commandName = checkCommandString.split(" ")[0];
-                Command command = bukkitCommandMap.getCommand(commandName);
+                String[] commandArray = checkCommandString.split(" ");
+                String commandName;
+                Command command;
                 boolean hasPerm = event.getPlayer().hasPermission("cbp.perm.*");
-                if (command != null) {
-                    hasPerm = plugin.usePlayerPermissions() &&
-                            event.getPlayer().hasPermission(command.getPermission())
-                            && !event.getPlayer().hasPermission("-cbp.perm." + command.getPermission())
-                            || event.getPlayer().hasPermission("cbp.perm." + command.getPermission());
-                } else {
-                    plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + (commandString.length() > 210 ? commandString.substring(0, 200) + "..." : commandString) + "'!");
-                }
+                List<String> deniedCommands = new ArrayList<>();
+                do {
+                    commandName = commandArray[0];
+                    command = bukkitCommandMap.getCommand(commandArray[0]);
+                    if (command != null) {
+                        boolean tempHasPerm = plugin.usePlayerPermissions() &&
+                                event.getPlayer().hasPermission(command.getPermission())
+                                && !event.getPlayer().hasPermission("-cbp.perm." + command.getPermission())
+                                || event.getPlayer().hasPermission("cbp.perm." + command.getPermission());
+                        if (!tempHasPerm) deniedCommands.add(commandName);
+                        hasPerm = hasPerm && tempHasPerm;
+                        if ("execute".equalsIgnoreCase(command.getName())) {
+                            int executeCommandLen = 5;
+                            if ("detect".equalsIgnoreCase(commandArray[5]) && commandArray.length > 11) {
+                                executeCommandLen = 11;
+                            }
+                            commandArray = Arrays.copyOfRange(commandArray, executeCommandLen, commandArray.length);
+                        }
+                    } else {
+                        plugin.getLogger().log(Level.WARNING, "Failed to check permissions for command '" + (commandString.length() > 210 ? commandString.substring(0, 200) + "..." : commandString) + "'!");
+                    }
+                } while ("execute".equalsIgnoreCase(commandName));
                 if (!hasPerm) {
                     plugin.warning(event.getPlayer().getName() + " doesn't have the permission to set the command '" + commandString + "'!");
-                    event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + commandName + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
+                    event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to set the command " + deniedCommands + " in Command " + (minecart ? "Minecarts" : "Blocks") + "!");
                     commandString = "cbp disabled " + event.getPlayer().getName() + " " + commandString;
                 }
             }
 
             String optPerm = "cbp.options.";
 
-            if (!trackOutput && !event.getPlayer().hasPermission(optPerm + "disabletrackoutput")){
+            if (!trackOutput && !event.getPlayer().hasPermission(optPerm + "disabletrackoutput")) {
                 event.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to disable tracking of the output!");
                 trackOutput = true;
             }
@@ -238,7 +256,9 @@ public class CommandBlockPacketListener extends PacketAdapter {
         } else if (length < 0) {
             throw new DecoderException("String buffer length is less than zero. Wat?");
         } else {
-            String s = new String(buf.readBytes(length).array(), Charsets.UTF_8);
+            byte[] tempByte = new byte[length];
+            buf.readBytes(tempByte);
+            String s = new String(tempByte, Charsets.UTF_8);
 
             if (s.length() > maxLength) {
                 throw new DecoderException("The received string is too long! (length" + length + ", allowed" + maxLength + ")");

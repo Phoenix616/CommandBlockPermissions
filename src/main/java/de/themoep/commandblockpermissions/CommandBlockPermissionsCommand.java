@@ -3,14 +3,11 @@ package de.themoep.commandblockpermissions;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.CommandBlock;
-import org.bukkit.command.BlockCommandSender;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.*;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 
-import java.util.logging.Level;
+import java.lang.reflect.Field;
 
 /**
  * Copyright 2016 Max Lee (https://github.com/Phoenix616/)
@@ -29,9 +26,13 @@ import java.util.logging.Level;
  */
 public class CommandBlockPermissionsCommand implements CommandExecutor {
     private final CommandBlockPermissions plugin;
+    private final CommandMap bukkitCommandMap;
 
-    public CommandBlockPermissionsCommand(CommandBlockPermissions plugin) {
+    public CommandBlockPermissionsCommand(CommandBlockPermissions plugin) throws NoSuchFieldException, IllegalAccessException {
         this.plugin = plugin;
+        Field commandMapField = plugin.getServer().getClass().getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        bukkitCommandMap = (CommandMap) commandMapField.get(plugin.getServer());
     }
 
     @Override
@@ -52,6 +53,23 @@ public class CommandBlockPermissionsCommand implements CommandExecutor {
                     plugin.warning("Command minecart in " + loc.getWorld().getName() + " at " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " tried to execute disabled command");
                 } else {
                     sender.sendMessage("This internal command can only be executed by a Command Block/Minecart!");
+                }
+                return true;
+            }
+            if ("checkPermission".equalsIgnoreCase(args[0])) {
+                if (sender instanceof Player) {
+                    String checkCommandString = args[1];
+                    if (checkCommandString.startsWith("/")) {
+                        checkCommandString = checkCommandString.substring(1);
+                    }
+                    Command chkCommand = bukkitCommandMap.getCommand(checkCommandString);
+                    if (chkCommand != null) {
+                        sender.sendMessage("You need to have this permission to execute the command:" + "cbp.perm." + chkCommand.getPermission());
+                    } else {
+                        sender.sendMessage("Command not found:" + checkCommandString);
+                    }
+                } else {
+                    sender.sendMessage("This internal command can only be executed by a Player!");
                 }
                 return true;
             }
